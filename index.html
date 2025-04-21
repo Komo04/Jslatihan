@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+<style>
+    body{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .item {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 2rem;
+        background-color:yellow;
+        transition: all 0.2s;
+    }
+
+    .empty {
+        background-color: transparent;
+        border: none;
+    }
+    #message {
+     font-size: 80px;
+     color: red;
+     }
+    .hidden {
+        visibility: hidden;
+    }
+</style>
+        <div id="message" class="hidden" >You Win</div>
+        <div id="grid-container"style="position: relative; width: 600px; height: 600px;"></div>
+<script>
+    const gridContainer = document.querySelector("#grid-container");
+    let puzzle = [];
+    let size = 3;
+
+    posisionPuzzle();
+    randomizePuzzle();
+    randerPuzzle();
+    addClickHandler(); 
+
+    function Row(pos) {
+        return Math.ceil(pos / size);
+    }
+
+    function Col(pos) {
+        const col = pos % size;
+        if (col === 0) {
+            return size;
+        }
+        return col;
+    }
+
+    function posisionPuzzle() {
+        for (let i = 1; i <= size * size; i++) {
+            puzzle.push({
+                value: i,
+                posision: i,
+                x: (Col(i) - 1) * 200,
+                y: (Row(i) - 1) * 200,
+                disabled: true,
+            });
+        }
+    }
+
+    function getRandomValues() {
+        const value = [];
+        for (let i = 1; i <= size * size; i++) {
+            value.push(i);
+        }
+        return value.sort(() => Math.random() - 0.5);
+    }
+
+    function randomizePuzzle() {
+        const randomValues = getRandomValues();
+        let i = 0;
+        for (let puzzleItem of puzzle) {
+            puzzleItem.value = randomValues[i];
+            i++;
+        }
+        const hidepazzle9 = puzzle.find((item) => item.value === size * size);
+        hidepazzle9.disabled = false;
+        console.log(puzzle);
+
+    }
+
+    function randerPuzzle() {
+        gridContainer.innerHTML = "";
+        for (let puzzleItem of puzzle) {
+            const isEmpty = puzzleItem.value === size * size;
+
+            gridContainer.innerHTML += `
+                <div class="item ${isEmpty ? 'empty' : ''}" 
+                    style="width: 200px; height:200px; border: 2px solid; position:absolute; 
+                    left:${puzzleItem.x}px; top:${puzzleItem.y}px;">
+                    ${isEmpty ? '' : puzzleItem.value}
+                </div>
+            `;
+        }
+    }
+
+    function kotak(i1, i2) {
+        const row1 = Math.floor(i1 / size);
+        const col1 = i1 % size;
+        const row2 = Math.floor(i2 / size);
+        const col2 = i2 % size;
+
+        //membandingan row dan kolom
+        return (
+            (Math.abs(row1 - row2) === 1 && col1 === col2) ||
+            (Math.abs(col1 - col2) === 1 && row1 === row2)
+        );
+    }
+    // Menukar isi dan kelas
+    function swapItem(item1, item2) {
+        [item1.innerHTML, item2.innerHTML] = [item2.innerHTML, item1.innerHTML];
+        item1.classList.toggle("empty");
+        item2.classList.toggle("empty");
+    }
+
+    // Event klik
+    function addClickHandler() {
+        gridContainer.addEventListener("click", e => {
+            const item = e.target;
+            const items = Array.from(document.querySelectorAll("#grid-container .item"));
+            if (!item.classList.contains("empty")) {
+                const emptyItem = items.find(el => el.classList.contains("empty"));
+                const itemIndex = items.indexOf(item);
+                const emptyIndex = items.indexOf(emptyItem);
+                if (kotak(itemIndex, emptyIndex)) {
+                    swapItem(item, emptyItem);
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+
+</html>
